@@ -4,8 +4,7 @@
 #include <stdio.h>
 #include <time.h>
 
-#include <glad/glad.h> // https://github.com/Dav1dde/glad
-#include <GLFW/glfw3.h> // https://github.com/glfw/glfw
+#include "gl.h"
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include <stb_image_write.h> // https://github.com/nothings/stb
@@ -75,7 +74,7 @@ int captureScreenshot()
 	int saved = saveScreenshot(filename);
 
 	if (saved)
-		printf("Successfully Saving Image: %s\n", filename);
+		printf("Successfully Saved Image: %s\n", filename);
 	else
 		fprintf(stderr, "Failed Saving Image: %s\n", filename);
 
@@ -90,15 +89,18 @@ int main(int argc, char *argv[])
 
 	if (!glfwInit())
 	{
-		fprintf(stderr, "Failed to initialize GLFW\n");
+		fprintf(stderr, "Failed initializing GLFW\n");
 		return EXIT_FAILURE;
 	}
 
-	GLFWwindow* window = glfwCreateWindow(640, 480, "Screenshot - GLCollection", NULL, NULL);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+
+	GLFWwindow *window = glfwCreateWindow(640, 480, "Screenshot - GLCollection", NULL, NULL);
 
 	if (!window)
 	{
-		fprintf(stderr, "Failed to create window\n");
+		fprintf(stderr, "Failed creating window\n");
 		glfwTerminate();
 		return EXIT_FAILURE;
 	}
@@ -108,7 +110,7 @@ int main(int argc, char *argv[])
 
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 	{
-		fprintf(stderr, "Failed to load OpenGL functions and extensions\n");
+		fprintf(stderr, "Failed loading OpenGL functions and extensions\n");
 		glfwTerminate();
 		return EXIT_FAILURE;
 	}

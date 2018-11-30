@@ -14,5 +14,8 @@ file(GLOB_RECURSE GLAD ${PROJECT_SOURCE_DIR}/libs/glad/*.h* ${PROJECT_SOURCE_DIR
 
 include_directories(${PROJECT_SOURCE_DIR}/libs/stb)
 
+add_executable(screen_quad screen_quad.cpp ${GLAD})
+target_link_libraries(screen_quad glfw)
+
 add_executable(screenshot screenshot.cpp ${GLAD})
 target_link_libraries(screenshot glfw)
