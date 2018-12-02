@@ -1,9 +1,17 @@
 #ifndef GLC_SHADER_H
 #define GLC_SHADER_H
 
+#include <stdlib.h>
 #include <stdio.h>
 
 #include "gl.h"
+
+#define GLC_ATTRIBUTE_POSITION 0
+#define GLC_ATTRIBUTE_TEXCOORD 1
+#define GLC_ATTRIBUTE_NORMAL   2
+
+#define _GLC_STRINGIFY(x) #x
+#define GLC_STRINGIFY(x) _GLC_STRINGIFY(x)
 
 const char* glcGetShaderTypeString(GLenum type)
 {
@@ -90,7 +98,41 @@ GLuint glcCreateShader(GLenum type, const GLchar *source)
 	return GLC_NULL_HANDLE;
 }
 
-GLuint glcCreateProgram(GLuint vertexShader, GLuint fragmentShader)
+GLuint glcCreateShaderFromFile(GLenum type, const char *filename)
+{
+	FILE *f = fopen(filename, "r");
+
+	if (!f)
+		return GLC_NULL_HANDLE;
+
+	fseek(f, 0, SEEK_END);
+	const size_t len = (size_t) ftell(f);
+	fseek(f, 0, SEEK_SET);
+
+	char *str = (char*) malloc((len + 1) * sizeof(char));
+
+	if (!str)
+	{
+		fclose(f);
+		return GLC_NULL_HANDLE;
+	}
+
+	size_t read = 0;
+	if (len > 0)
+		read = fread(str, sizeof(char), len, f);
+
+	str[read] = '\0';
+
+	fclose(f);
+
+	GLuint shader = glcCreateShader(type, str);
+
+	free(str);
+
+	return shader;
+}
+
+GLuint glcCreateProgram(GLuint vertexShader, GLuint fragmentShader, GLuint geometryShader = GLC_NULL_HANDLE)
 {
 	GLuint program = glCreateProgram();
 
@@ -99,6 +141,9 @@ GLuint glcCreateProgram(GLuint vertexShader, GLuint fragmentShader)
 
 	glAttachShader(program, vertexShader);
 	glAttachShader(program, fragmentShader);
+
+	if (geometryShader != GLC_NULL_HANDLE)
+		glAttachShader(program, geometryShader);
 
 	glBindFragDataLocation(program, 0, "fragColor");
 
@@ -127,6 +172,9 @@ GLuint glcCreateProgram(GLuint vertexShader, GLuint fragmentShader)
 
 	glDetachShader(program, vertexShader);
 	glDetachShader(program, fragmentShader);
+
+	if (geometryShader != GLC_NULL_HANDLE)
+		glDetachShader(program, geometryShader);
 
 	return program;
 }

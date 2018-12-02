@@ -23,3 +23,6 @@ target_link_libraries(screen_quad glfw)
 
 add_executable(screenshot screenshot.cpp ${GLAD})
 target_link_libraries(screenshot glfw)
+
+add_executable(visualizing_normals visualizing_normals.cpp ${GLAD})
+target_link_libraries(visualizing_normals glfw)

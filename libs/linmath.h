@@ -9,6 +9,18 @@
 
 #define GLC_RAD(degrees) ((degrees) * GLC_PI / 180.0f)
 
+void mat4Identity(float matrix[16])
+{
+	const float identity[16] = {
+			1.0f, 0.0f, 0.0f, 0.0f,
+			0.0f, 1.0f, 0.0f, 0.0f,
+			0.0f, 0.0f, 1.0f, 0.0f,
+			0.0f, 0.0f, 0.0f, 1.0f,
+	};
+
+	memcpy(matrix, identity, sizeof(identity));
+}
+
 void mat4Multiply(float matrix[16], const float lhs[16], const float rhs[16])
 {
 	for (int i = 0; i < 4; ++i)
@@ -99,6 +111,36 @@ void mat4Rotation(float matrix[16], float angle, float x, float y, float z)
 	matrix[13] = 0.0f;
 	matrix[14] = 0.0f;
 	matrix[15] = 1.0f;
+}
+
+void mat4Translate(float matrix[16], float x, float y, float z)
+{
+	float transform[16], result[16];
+
+	mat4Translation(transform, x, y, z);
+	mat4Multiply(result, matrix, transform);
+
+	memcpy(matrix, result, sizeof(result));
+}
+
+void mat4Scale(float matrix[16], float sx, float sy, float sz)
+{
+	float transform[16], result[16];
+
+	mat4Scaling(transform, sx, sy, sz);
+	mat4Multiply(result, matrix, transform);
+
+	memcpy(matrix, result, sizeof(result));
+}
+
+void mat4Rotate(float matrix[16], float angle, float x, float y, float z)
+{
+	float transform[16], result[16];
+
+	mat4Rotation(transform, angle, x, y, z);
+	mat4Multiply(result, matrix, transform);
+
+	memcpy(matrix, result, sizeof(result));
 }
 
 #endif
