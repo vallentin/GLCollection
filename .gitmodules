@@ -4,3 +4,6 @@
 [submodule "libs/stb"]
 	path = libs/stb
 	url = https://github.com/nothings/stb
+[submodule "libs/LoadOBJ"]
+	path = libs/LoadOBJ
+	url = https://github.com/Vallentin/LoadOBJ

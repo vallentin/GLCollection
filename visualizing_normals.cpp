@@ -1,10 +1,44 @@
 
+#include <stddef.h>
 #include <stdlib.h>
 #include <stdio.h>
+
+#define LOADOBJ_IMPLEMENTATION
+#include <loadobj.h> // https://github.com/Vallentin/LoadOBJ
 
 #include "gl.h"
 #include "shader.h"
 #include "linmath.h"
+
+char* loadFile(const char *filename)
+{
+	FILE *f = fopen(filename, "r");
+
+	if (!f)
+		return NULL;
+
+	fseek(f, 0, SEEK_END);
+	const size_t len = (size_t) ftell(f);
+	fseek(f, 0, SEEK_SET);
+
+	char *str = (char*) malloc((len + 1) * sizeof(char));
+
+	if (!str)
+	{
+		fclose(f);
+		return NULL;
+	}
+
+	size_t read = 0;
+	if (len > 0)
+		read = fread(str, sizeof(char), len, f);
+
+	str[read] = '\0';
+
+	fclose(f);
+
+	return str;
+}
 
 int main(int argc, char *argv[])
 {
@@ -89,67 +123,21 @@ int main(int argc, char *argv[])
 
 	const GLint defaultMVPLocation = glGetUniformLocation(defaultProgram, "mvp");
 	const GLint visualizeNormalsMVPLocation = glGetUniformLocation(visualizeNormalsProgram, "mvp");
+	const GLint visualizeNormalsLengthLocation = glGetUniformLocation(visualizeNormalsProgram, "length");
 
-	static const GLfloat vertices[] = {
-			// X, Y, Z, NX, NY, NZ
+	char *str = loadFile("models/suzanne.obj");
 
-			// Front
-			-0.5f,  0.5f, 0.5f, 0.0f, 0.0f, 1.0f, // Top Left
-			-0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 1.0f, // Bottom Left
-			 0.5f,  0.5f, 0.5f, 0.0f, 0.0f, 1.0f, // Top Right
+	LoadOBJMesh mesh;
+	loadOBJ(&mesh, str);
 
-			 0.5f,  0.5f, 0.5f, 0.0f, 0.0f, 1.0f, // Top Right
-			-0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 1.0f, // Bottom Left
-			 0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 1.0f, // Bottom Right
+	free(str);
 
-			// Back
-			 0.5f,  0.5f, -0.5f, 0.0f, 0.0f, -1.0f, // Top Left
-			 0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -1.0f, // Bottom Left
-			-0.5f,  0.5f, -0.5f, 0.0f, 0.0f, -1.0f, // Top Right
+	LoadOBJTriangleMesh trimesh;
+	loadOBJTriangulate(&trimesh, &mesh);
 
-			-0.5f,  0.5f, -0.5f, 0.0f, 0.0f, -1.0f, // Top Right
-			 0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -1.0f, // Bottom Left
-			-0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -1.0f, // Bottom Right
+	loadOBJDestroyMesh(&mesh);
 
-			// Top
-			-0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f, // Top Left
-			-0.5f, 0.5f,  0.5f, 0.0f, 1.0f, 0.0f, // Bottom Left
-			 0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f, // Top Right
-
-			 0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f, // Top Right
-			-0.5f, 0.5f,  0.5f, 0.0f, 1.0f, 0.0f, // Bottom Left
-			 0.5f, 0.5f,  0.5f, 0.0f, 1.0f, 0.0f, // Bottom Right
-
-			 // Bottom
-			-0.5f, -0.5f,  0.5f, 0.0f, -1.0f, 0.0f, // Top Left
-			-0.5f, -0.5f, -0.5f, 0.0f, -1.0f, 0.0f, // Bottom Left
-			 0.5f, -0.5f,  0.5f, 0.0f, -1.0f, 0.0f, // Top Right
-
-			 0.5f, -0.5f,  0.5f, 0.0f, -1.0f, 0.0f, // Top Right
-			-0.5f, -0.5f, -0.5f, 0.0f, -1.0f, 0.0f, // Bottom Left
-			 0.5f, -0.5f, -0.5f, 0.0f, -1.0f, 0.0f, // Bottom Right
-
-			// Right
-			0.5f,  0.5f,  0.5f, 1.0f, 0.0f, 0.0f, // Top Left
-			0.5f, -0.5f,  0.5f, 1.0f, 0.0f, 0.0f, // Bottom Left
-			0.5f,  0.5f, -0.5f, 1.0f, 0.0f, 0.0f, // Top Right
-
-			0.5f,  0.5f, -0.5f, 1.0f, 0.0f, 0.0f, // Top Right
-			0.5f, -0.5f,  0.5f, 1.0f, 0.0f, 0.0f, // Bottom Left
-			0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, // Bottom Right
-
-			// Left
-			-0.5f,  0.5f, -0.5f, -1.0f, 0.0f, 0.0f, // Top Left
-			-0.5f, -0.5f, -0.5f, -1.0f, 0.0f, 0.0f, // Bottom Left
-			-0.5f,  0.5f,  0.5f, -1.0f, 0.0f, 0.0f, // Top Right
-
-			-0.5f,  0.5f,  0.5f, -1.0f, 0.0f, 0.0f, // Top Right
-			-0.5f, -0.5f, -0.5f, -1.0f, 0.0f, 0.0f, // Bottom Left
-			-0.5f, -0.5f,  0.5f, -1.0f, 0.0f, 0.0f, // Bottom Right
-	};
-
-	static const GLsizei vertexSize = 6;
-	static const GLsizei vertexCount = sizeof(vertices) / sizeof(*vertices) / vertexSize;
+	const GLsizei vertexCount = trimesh.vertexCount;
 
 	GLuint vao, vbo;
 
@@ -158,13 +146,15 @@ int main(int argc, char *argv[])
 
 	glCreateBuffers(1, &vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, vertexCount * sizeof(LoadOBJTriangleVertex), trimesh.vertices, GL_STATIC_DRAW);
 
 	glEnableVertexAttribArray(GLC_ATTRIBUTE_POSITION);
-	glVertexAttribPointer(GLC_ATTRIBUTE_POSITION, 3, GL_FLOAT, GL_FALSE, vertexSize * sizeof(GLfloat), 0);
+	glVertexAttribPointer(GLC_ATTRIBUTE_POSITION, 3, GL_FLOAT, GL_FALSE, sizeof(LoadOBJTriangleVertex), (const GLvoid*) offsetof(LoadOBJTriangleVertex, x));
 
 	glEnableVertexAttribArray(GLC_ATTRIBUTE_NORMAL);
-	glVertexAttribPointer(GLC_ATTRIBUTE_NORMAL, 3, GL_FLOAT, GL_FALSE, vertexSize * sizeof(GLfloat), reinterpret_cast<const GLvoid*>(3 * sizeof(GLfloat)));
+	glVertexAttribPointer(GLC_ATTRIBUTE_NORMAL, 3, GL_FLOAT, GL_FALSE, sizeof(LoadOBJTriangleVertex), (const GLvoid*) offsetof(LoadOBJTriangleVertex, nx));
+
+	loadOBJDestroyTriangleMesh(&trimesh);
 
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
@@ -176,6 +166,9 @@ int main(int argc, char *argv[])
 	static const float fov   = 70.0f;
 	static const float zNear = 0.01f;
 	static const float zFar  = 10.0f;
+
+	glUseProgram(visualizeNormalsProgram);
+	glUniform1f(visualizeNormalsLengthLocation, 0.2f);
 
 	while (!glfwWindowShouldClose(window))
 	{

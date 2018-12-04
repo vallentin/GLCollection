@@ -12,6 +12,7 @@ add_subdirectory(${PROJECT_SOURCE_DIR}/libs/glfw)
 include_directories(${PROJECT_SOURCE_DIR}/libs)
 include_directories(${PROJECT_SOURCE_DIR}/libs/glad/include)
 include_directories(${PROJECT_SOURCE_DIR}/libs/stb)
+include_directories(${PROJECT_SOURCE_DIR}/libs/LoadOBJ)
 
 file(GLOB_RECURSE GLAD ${PROJECT_SOURCE_DIR}/libs/glad/*.h* ${PROJECT_SOURCE_DIR}/libs/glad/*.c*)
 
