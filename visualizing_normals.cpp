@@ -9,6 +9,7 @@
 #include "gl.h"
 #include "shader.h"
 #include "linmath.h"
+#include "glfw_utilities.h"
 
 char* loadFile(const char *filename)
 {
@@ -59,6 +60,8 @@ int main(int argc, char *argv[])
 		glfwTerminate();
 		return EXIT_FAILURE;
 	}
+
+	glcCenterWindow(window, glcGetBestMonitor(window));
 
 	glfwShowWindow(window);
 	glfwMakeContextCurrent(window);

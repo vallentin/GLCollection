@@ -4,6 +4,7 @@
 
 #include "gl.h"
 #include "shader.h"
+#include "glfw_utilities.h"
 
 int main(int argc, char *argv[])
 {
@@ -24,6 +25,8 @@ int main(int argc, char *argv[])
 		glfwTerminate();
 		return EXIT_FAILURE;
 	}
+
+	glcCenterWindow(window, glcGetBestMonitor(window));
 
 	glfwShowWindow(window);
 	glfwMakeContextCurrent(window);

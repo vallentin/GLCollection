@@ -5,6 +5,7 @@
 #include <time.h>
 
 #include "gl.h"
+#include "glfw_utilities.h"
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include <stb_image_write.h> // https://github.com/nothings/stb
@@ -104,6 +105,8 @@ int main(int argc, char *argv[])
 		glfwTerminate();
 		return EXIT_FAILURE;
 	}
+
+	glcCenterWindow(window, glcGetBestMonitor(window));
 
 	glfwShowWindow(window);
 	glfwMakeContextCurrent(window);
